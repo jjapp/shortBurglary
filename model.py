@@ -6,7 +6,7 @@ from agent import House, Criminal
 
 class BurglaryModel(Model):
 
-    def __init__(self, N, width, height, b_rate, delta, omega, theta, mu):
+    def __init__(self, N, width, height, b_rate, delta, omega, theta, mu, gamma):
         self.num_agents = N
         self.grid = MultiGrid(width, height, True)
         self.width = width
@@ -19,12 +19,14 @@ class BurglaryModel(Model):
         self.theta = theta
         self.mu = mu
         self.kill_agents = []
+        self.gamma = gamma
+        self.total_agents = self.num_agents
 
         a_0 = 0.2
         # place houses on grid, 1 house per grid location
         for i in range(self.width):
             for j in range(self.height):
-                num = str(i)+str(j)
+                num = str(i) + str(j)
                 num = int(num)
                 a = House(num, self, a_0, i, j, self.delta, self.omega, self.theta, self.mu)
                 self.grid.place_agent(a, (a.x_point, a.y_point))
@@ -32,10 +34,21 @@ class BurglaryModel(Model):
 
         # place the criminals
         for k in range(self.num_agents):
-            unique_id = "criminal"+str(k)
+            unique_id = "criminal" + str(k)
             criminal = Criminal(unique_id, self, self.width, self.height)
             self.grid.place_agent(criminal, (criminal.x_point, criminal.y_point))
             self.schedule.add(criminal)
+
+    def add_criminals(self):
+        start_count = self.total_agents + 1
+        for i in range(self.gamma):
+            unique_id = "criminal" + str(start_count)
+            criminal = Criminal(unique_id, self, self.width, self.height)
+            self.grid.place_agent(criminal, (criminal.x_point, criminal.y_point))
+            self.schedule.add(criminal)
+            start_count = start_count + 1
+        self.total_agents = start_count
+
 
     def step(self):
         # cycle through all houses and calculate updates on their attractiveness
@@ -51,13 +64,20 @@ class BurglaryModel(Model):
                         k.update_crime_list()
 
         self.schedule.step()
-        '''
-        print (len(self.kill_agents))
         for row in self.kill_agents:
-            print (row.unique_id)
-            self.grid.remove_agent(row)
-            self.schedule.remove(row)
-            self.kill_agents.remove(row)'''
+            try:
+                self.grid.remove_agent(row)
+                self.schedule.remove(row)
+                self.kill_agents.remove(row)
+
+            except:
+                self.kill_agents.remove(row)
+
+        # add new criminals
+
+        self.add_criminals()
+
+
 
 
 if __name__ == '__main__':
@@ -65,6 +85,4 @@ if __name__ == '__main__':
     for i in range(10):
         model.step()
 
-
-
-    print (model)
+    print(model)

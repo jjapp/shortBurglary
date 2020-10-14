@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from agent import House
 
-model = model.BurglaryModel(1500, 100, 100, 5, 0.01, 0.06, 5.6, 0.2)
+model = model.BurglaryModel(150, 100, 100, 5, 0.01, 0.06, 5.6, 0.2, 10)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    for i in range(150):
+    for i in range(50):
         model.step()
         print(i)
 
