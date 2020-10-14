@@ -20,7 +20,7 @@ class BurglaryModel(Model):
         self.mu = mu
         self.kill_agents = []
 
-        a_0 = b_rate/delta
+        a_0 = 0.2
         # place houses on grid, 1 house per grid location
         for i in range(self.width):
             for j in range(self.height):
@@ -49,19 +49,16 @@ class BurglaryModel(Model):
                         k.update_att()
                         k.update_p_s()
                         k.update_crime_list()
+
         self.schedule.step()
-
-
         '''
+        print (len(self.kill_agents))
         for row in self.kill_agents:
             print (row.unique_id)
-
-        
-        for row in self.kill_agents:
-            # self.grid.remove_agent(row)
+            self.grid.remove_agent(row)
             self.schedule.remove(row)
-            self.kill_agents.remove(row)
-            '''
+            self.kill_agents.remove(row)'''
+
 
 if __name__ == '__main__':
     model = BurglaryModel(5, 100, 100, 2, 5, 5, 0.5, 0.2)

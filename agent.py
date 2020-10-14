@@ -16,10 +16,10 @@ class House(Agent):
         self.theta = theta
         self.mu = mu
         self.crime_events = 0
-        self.crime_list = []
+        self.crime_list = [0]
         self.beta = 0
         self.att_t = self.attractiveness + self.beta
-        self.p_s = 1 - math.exp(-self.att_t)
+        self.p_s = 1 - math.exp(-self.att_t*self.delta)
 
     def burgle(self):
         self.crime_events = self.crime_events + 1
@@ -31,8 +31,9 @@ class House(Agent):
         for i in neighbors:
             if isinstance(i, House):
                 b_n = b_n + i.beta
-        self.beta = ((1 - self.mu) * self.beta + (self.mu / (len(neighbors)) * b_n) * (1 - self.omega) * (
-            self.delta)) + self.theta * self.crime_events
+
+        self.beta = ((1 - self.mu) * self.beta + (self.mu / 4) * b_n) * (1 - self.omega * (
+            self.delta)) + self.theta * self.crime_list[0]
 
     def update_att(self):
         self.att_t = self.beta + self.attractiveness
@@ -40,10 +41,11 @@ class House(Agent):
     def update_p_s(self):
         self.p_s = 1 - np.exp(-self.att_t * self.delta)
 
+
     def update_crime_list(self):
         self.crime_list.insert(0, self.crime_events)
         # check if length is longer than delta
-        if len(self.crime_list) > self.delta:
+        if len(self.crime_list) > (1/self.delta):
             self.crime_list.pop()
         self.crime_events = 0
 
@@ -98,6 +100,13 @@ class Criminal(Agent):
                     temp = move_list[j]
                     move_list[j] = move_list[j + 1]
                     move_list[j + 1] = temp
+
+        # convert move probabilities to cumulative
+        cum_prob = 0
+        for i in range(len(move_list)):
+            cum_prob = cum_prob + move_list[i]['prob']
+            move_list[i]['prob'] = cum_prob
+
         # now decide what house you'll move to
         p = random.random()
 
@@ -105,6 +114,9 @@ class Criminal(Agent):
             if p < row['prob']:
                 move_dest = row['house']
                 self.model.grid.move_agent(self, pos=move_dest)
+                break
+            else:
+                continue
 
     def step(self):
         self.burgle_decision()
