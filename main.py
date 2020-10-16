@@ -24,6 +24,4 @@ if __name__ == '__main__':
     plt.colorbar()
     plt.show()
 
-
-
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

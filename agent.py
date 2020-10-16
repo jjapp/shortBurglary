@@ -41,7 +41,6 @@ class House(Agent):
     def update_p_s(self):
         self.p_s = 1 - np.exp(-self.att_t * self.delta)
 
-
     def update_crime_list(self):
         self.crime_list.insert(0, self.crime_events)
         # check if length is longer than delta
