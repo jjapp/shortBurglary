@@ -8,7 +8,7 @@ The model is implemented in python using the Mesa library for agent based modeli
 
 The model consists of a neighborhood of houses.  Each house has an attractiveness score:
 
-$$A = B_s + A_0$$
+<img src="https://render.githubusercontent.com/render/math?math=$$A = B_s + A_0">
 
 The attractiveness score is composed of a baseline attractiveness $A_0$ and a dynamic component $B_s$.
 
