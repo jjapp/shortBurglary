@@ -6,7 +6,7 @@ import numpy as np
 
 class House(Agent):
 
-    def __init__(self, unique_id, model, attractiveness, x_point, y_point, delta, omega, theta, mu):
+    def __init__(self, unique_id, model, attractiveness, x_point, y_point, delta, omega, theta, mu, space):
         super().__init__(unique_id, model)
         self.attractiveness = attractiveness
         self.x_point = x_point
@@ -15,6 +15,7 @@ class House(Agent):
         self.omega = omega
         self.theta = theta
         self.mu = mu
+        self.space = space
         self.crime_events = 0
         self.crime_list = [0]
         self.beta = 0
@@ -26,33 +27,33 @@ class House(Agent):
 
     def update_beta(self):
         neighbors = self.model.grid.get_neighbors(pos=(self.x_point, self.y_point),
-                                                  moore=True, include_center=False, radius=1)
+                                                  moore=False, include_center=False, radius=1)
         b_n = 0
         for i in neighbors:
             if isinstance(i, House):
                 b_n = b_n + i.beta
 
-        self.beta = ((1 - self.mu) * self.beta + (self.mu / 4) * b_n) * (1 - self.omega * (
-            self.delta)) + self.theta * self.crime_list[0]
+        self._beta = (self.beta + (self.mu / 4) * (b_n -4 * self.beta)) * (1 - self.omega * (
+            self.delta)) + self.theta * self.crime_events
 
     def update_att(self):
-        self.att_t = self.beta + self.attractiveness
+        self._att_t = self.beta + self.attractiveness
 
     def update_p_s(self):
-        self.p_s = 1 - np.exp(-self.att_t * self.delta)
+        self._p_s = 1 - np.exp(-self.att_t * self.delta)
 
-    def update_crime_list(self):
-        self.crime_list.insert(0, self.crime_events)
-        # check if length is longer than delta
-        if len(self.crime_list) > (1/self.delta):
-            self.crime_list.pop()
-        self.crime_events = 0
 
     def step(self):
         self.update_beta()
         self.update_att()
         self.update_p_s()
-        self.update_crime_list()
+
+    def advance(self):
+        self.att_t = self._att_t
+        self.beta = self._beta
+        self.p_s = self._p_s
+        self.crime_events = 0
+
 
 
 class Criminal(Agent):
@@ -75,7 +76,7 @@ class Criminal(Agent):
                     self.decision = 0  # if you don't burgle you move
 
     def move(self):
-        neighbors = self.model.grid.get_neighbors(pos=(self.x_point, self.y_point), moore=True,
+        neighbors = self.model.grid.get_neighbors(pos=(self.x_point, self.y_point), moore=False,
                                                   include_center=False, radius=1)
         # calculate sum of probabilities
         a_t_sum = 0
@@ -119,6 +120,8 @@ class Criminal(Agent):
 
     def step(self):
         self.burgle_decision()
+
+    def advance(self):
         if self.decision == 1:
             loc_contents = self.model.grid.get_cell_list_contents([(self.x_point, self.y_point)])
             for i in loc_contents:
