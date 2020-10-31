@@ -21,11 +21,10 @@ if __name__ == '__main__':
             if isinstance(row, House):
                 crimes = row.att_t
                 crime_counts[x][y] = crimes
-    # make a color map of fixed colors
-    cmap = colors.ListedColormap(['blue', 'white', 'green', 'red', 'yellow'])
-    bounds = [0.2, 0.4, 1, 10]
+  
+    norm = colors.Normalize(vmin=0.2, vmax=(model.theta * 0.75))
 
-    plt.imshow(crime_counts, interpolation='nearest', cmap=cmap)# cmap=plt.get_cmap('seismic'))
+    plt.imshow(crime_counts, interpolation='nearest', cmap=plt.get_cmap('seismic'), norm=norm)
     plt.colorbar()
     plt.show()
 
