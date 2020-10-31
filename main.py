@@ -21,7 +21,7 @@ if __name__ == '__main__':
             if isinstance(row, House):
                 crimes = row.att_t
                 crime_counts[x][y] = crimes
-  
+
     norm = colors.Normalize(vmin=0.2, vmax=(model.theta * 0.75))
 
     plt.imshow(crime_counts, interpolation='nearest', cmap=plt.get_cmap('seismic'), norm=norm)
